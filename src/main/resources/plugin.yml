@@ -1,0 +1,7 @@
+name: FilesAPI
+version: '${project.version}'
+main: fr.gregderiz.filesapi.FilesPlugin
+api-version: '1.20'
+load: STARTUP
+authors: [GregDeRiz]
+description: An API that manage files and folders
