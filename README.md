@@ -21,7 +21,7 @@ Make sure to correctly update your pom.xml accordingly:
 <dependency>
   <groupId>com.github.GregDeRiz</groupId>
   <artifactId>FilesAPI</artifactId>
-  <version>0.1</version>
+  <version>VERSION</version>
 </dependency>
 ```
 If you find bugs- report them as a GitHub issue. Thanks!
