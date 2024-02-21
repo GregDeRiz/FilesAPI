@@ -1,7 +1,6 @@
 package fr.gregderiz.filesapi;
 
 import org.bukkit.Bukkit;
-import org.bukkit.plugin.Plugin;
 
 import java.io.File;
 import java.util.*;
@@ -9,10 +8,43 @@ import java.util.*;
 public class FilesController {
     private static final Map<File, Set<File>> folders = new HashMap<>();
 
-    @SuppressWarnings("ResultOfMethodCallIgnored")
-    public static void setupFolder(Plugin plugin, String directoryName) {
-        File directory = new File(plugin.getDataFolder() + File.separator + directoryName);
-        if (!directory.exists()) directory.mkdir();
+    public static Map<File, Set<File>> getFolders() {
+        return folders;
+    }
+
+    public static Optional<File> findDirectoryByName(String directoryName) {
+        return getFolders().keySet().stream().filter(file -> {
+            String name = file.getName().substring(0, file.getName().lastIndexOf("."));
+            return name.equalsIgnoreCase(directoryName);
+        }).findAny();
+    }
+
+    public static Set<File> getFilesFromDirectory(File directory) {
+        if (FilesChecker.checkIfDirectoryIsNull(directory)) return null;
+        return getFolders().get(directory);
+    }
+
+    public static void addFileToFolder(File directory, File file) {
+        if (FilesChecker.checkIfDirectoryIsNull(directory)) return;
+        if (FilesChecker.checkIfFileIsNull(file)) return;
+
+        Set<File> files = getFolders().get(directory);
+        if (files.contains(file)) return;
+        files.add(file);
+    }
+
+    public static void removeFileFromFolder(File directory, File file, boolean canDelete) {
+        if (FilesChecker.checkIfDirectoryIsNull(directory)) return;
+        if (FilesChecker.checkIfFileIsNull(file)) return;
+
+        Set<File> files = getFolders().get(directory);
+        if (!files.contains(file)) return;
+        files.remove(file);
+        if (canDelete) FileProperties.delete(file);
+    }
+
+    public static void addFolder(File directory) {
+        if (getFolders().containsKey(directory)) return;
 
         File[] files = directory.listFiles();
         if (files == null) {
@@ -23,51 +55,9 @@ public class FilesController {
         folders.put(directory, new HashSet<>(Arrays.asList(files)));
     }
 
-    public static Set<File> getFilesFromDirectoryName(String directoryName) {
-        Optional<File> optionalDirectory = getFolders().keySet().stream().filter(file -> {
-            String name = file.getName().substring(0, file.getName().lastIndexOf("."));
-            return name.equalsIgnoreCase(directoryName);
-        }).findAny();
-
-        if (!optionalDirectory.isPresent()) {
-            Bukkit.getLogger().severe("There are no directories with that name.");
-            return null;
-        }
-
-        return folders.get(optionalDirectory.get());
-    }
-
-    public static Map<File, Set<File>> getFolders() {
-        return folders;
-    }
-
-    public static void addFileInFolder(File directory, File file) {
-        if (directory == null || folders.get(directory) == null) {
-            Bukkit.getLogger().severe("The directory is null.");
-            return;
-        }
-
-        if (file == null) {
-            Bukkit.getLogger().severe("The file you want to add is null.");
-            return;
-        }
-
-        if (folders.get(directory).contains(file)) return;
-        folders.get(directory).add(file);
-    }
-
-    public static void removeFileFromFolder(File directory, File file) {
-        if (directory == null || folders.get(directory) == null) {
-            Bukkit.getLogger().severe("The directory is null.");
-            return;
-        }
-
-        if (file == null) {
-            Bukkit.getLogger().severe("The file you want to add is null.");
-            return;
-        }
-
-        if (!folders.get(directory).contains(file)) return;
-        folders.get(directory).remove(file);
+    public static void removeFolder(File directory, boolean canDelete) {
+        if (!getFolders().containsKey(directory)) return;
+        folders.remove(directory);
+        if (canDelete) FileProperties.delete(directory);
     }
 }
