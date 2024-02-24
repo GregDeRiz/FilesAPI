@@ -1,5 +1,6 @@
 package fr.gregderiz.filesapi;
 
+import org.bukkit.Bukkit;
 import org.bukkit.plugin.Plugin;
 
 import java.io.File;
@@ -11,16 +12,20 @@ import java.util.Set;
 
 @SuppressWarnings("all")
 public class FilesProperty {
-    public static File create(Plugin plugin, String path, String name) {
+    public static File create(Plugin plugin, File path, String name, boolean isDirectory) {
         File file = new File(path, name);
-        if (file.isDirectory()) {
-            if (!file.exists()) file.mkdir();
+        if (isDirectory) {
+            if (!file.exists()) file.mkdirs();
             FilesController.addFolder(file);
             return file;
         }
 
-        if (!file.exists()) file.mkdirs();
-        FilesController.addFolder(file.getParentFile());
+        if (!file.exists()) {
+            try {
+                file.createNewFile();
+                FilesController.addFolder(file.getParentFile());
+            } catch (IOException e) { Bukkit.getLogger().severe("Error when creating file by execption: " + e); }
+        }
         return file;
     }
 
