@@ -10,12 +10,18 @@ import java.nio.file.Files;
 import java.util.Set;
 
 @SuppressWarnings("all")
-public class FileProperties {
-    public static void create(Plugin plugin, String directoryName) {
-        File directory = new File(plugin.getDataFolder() + File.separator + directoryName);
-        if (!directory.exists()) directory.mkdir();
+public class FilesProperty {
+    public static File create(Plugin plugin, String path, String name) {
+        File file = new File(path, name);
+        if (file.isDirectory()) {
+            if (!file.exists()) file.mkdir();
+            FilesController.addFolder(file);
+            return file;
+        }
 
-        FilesController.addFolder(directory);
+        if (!file.exists()) file.mkdirs();
+        FilesController.addFolder(file.getParentFile());
+        return file;
     }
 
     public static void copy(File source, File destination) {

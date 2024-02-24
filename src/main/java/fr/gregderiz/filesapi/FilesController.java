@@ -40,7 +40,7 @@ public class FilesController {
         Set<File> files = getFolders().get(directory);
         if (!files.contains(file)) return;
         files.remove(file);
-        if (canDelete) FileProperties.delete(file);
+        if (canDelete) FilesProperty.delete(file);
     }
 
     public static void addFolder(File directory) {
@@ -58,6 +58,6 @@ public class FilesController {
     public static void removeFolder(File directory, boolean canDelete) {
         if (!getFolders().containsKey(directory)) return;
         folders.remove(directory);
-        if (canDelete) FileProperties.delete(directory);
+        if (canDelete) FilesProperty.delete(directory);
     }
 }
