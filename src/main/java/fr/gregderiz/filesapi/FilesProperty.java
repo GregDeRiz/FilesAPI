@@ -1,32 +1,26 @@
 package fr.gregderiz.filesapi;
 
 import org.bukkit.Bukkit;
-import org.bukkit.plugin.Plugin;
 
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.file.Files;
+import java.util.Optional;
 import java.util.Set;
 
 @SuppressWarnings("all")
 public class FilesProperty {
-    public static File create(Plugin plugin, File path, String name, boolean isDirectory) {
-        File file = new File(path, name);
-        if (isDirectory) {
-            if (!file.exists()) file.mkdirs();
-            FilesController.addFolder(file);
-            return file;
-        }
+    private static final FilesManager filesManager = FilesManager.getFileManager();
 
-        if (!file.exists()) {
-            try {
-                file.createNewFile();
-                FilesController.addFolder(file.getParentFile());
-            } catch (IOException e) { Bukkit.getLogger().severe("Error when creating file by execption: " + e); }
-        }
-        return file;
+    public static File create(File path, String name) {
+        File file = new File(path, name);
+        return filesManager.loadFile(file);
+    }
+
+    public static File create(FileBuilder fileBuilder) {
+        return filesManager.loadFile(fileBuilder.build());
     }
 
     public static void copy(File source, File destination) {
@@ -60,10 +54,17 @@ public class FilesProperty {
 
     public static void delete(File file) {
         if (file.isDirectory()) {
-            Set<File> files = FilesController.getFilesFromDirectory(file);
-            if (files == null) return;
+            Optional<Set<File>> optionalFiles = FilesController.getFilesFromDirectory(file);
+            if (!optionalFiles.isPresent()) {
+                Bukkit.getLogger().warning("Directory named " + file.getName() + " is empty");
+                return;
+            }
 
-            for (File child : files) delete(child);
+            Set<File> files = optionalFiles.get();
+            for (File child : files) {
+                delete(child);
+                FilesController.removeFileFromFolder(file, child);
+            }
         }
 
         file.delete();

@@ -6,7 +6,7 @@ import java.io.File;
 
 public class FilesChecker {
     public static boolean checkIfDirectoryIsNull(File directory) {
-        if (directory == null || FilesController.getFolders().get(directory) == null) {
+        if (directory == null) {
             Bukkit.getLogger().severe("The directory is null.");
             return true;
         }
@@ -21,5 +21,9 @@ public class FilesChecker {
         }
 
         return false;
+    }
+
+    public static boolean checkIfDirectory(File file) {
+        return file.getName().contains(".");
     }
 }
