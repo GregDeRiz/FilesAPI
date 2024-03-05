@@ -6,41 +6,46 @@ import java.io.File;
 import java.util.*;
 
 public class FilesController {
-    private static final Map<File, Set<File>> folders = new HashMap<>();
-    private static final FilesManager filesManager = FilesManager.getFileManager();
+    private final Map<File, Set<File>> folders;
+    private final FilesManager filesManager;
 
-    public static Map<File, Set<File>> getFolders() {
+    public FilesController(FilesManager filesManager) {
+        this.folders = new HashMap<>();
+        this.filesManager = filesManager;
+    }
+
+    public Map<File, Set<File>> getFolders() {
         return folders;
     }
 
-    public static Optional<File> findDirectoryByName(String name) {
-        return getFolders().keySet().stream().filter(directory -> directory.getName().equalsIgnoreCase(name)).findAny();
+    public Optional<File> findDirectoryByName(String name) {
+        return this.folders.keySet().stream().filter(directory -> directory.getName().equalsIgnoreCase(name)).findAny();
     }
 
-    public static Optional<File> findFileByName(File directory, String name) {
-        Set<File> files = getFilesList(directory);
+    public Optional<File> findFileByName(File directory, String name) {
+        Set<File> files = this.filesManager.getFilesList(directory);
         return (files == null) ? Optional.empty() : files.stream().filter(file ->
-                filesManager.getNameWithoutExtension(file.getName()).equalsIgnoreCase(name)).findAny();
+                this.filesManager.getNameWithoutExtension(file.getName()).equalsIgnoreCase(name)).findAny();
     }
 
-    public static Optional<Set<File>> getFilesFromDirectory(File directory) {
-        return Optional.ofNullable(getFolders().get(directory));
+    public Optional<Set<File>> getFilesFromDirectory(File directory) {
+        return Optional.ofNullable(this.folders.get(directory));
     }
 
-    public static void addFileToFolder(File directory, File file) {
+    public void addFileToFolder(File directory, File file) {
         if (FilesChecker.checkIfFileIsNull(file)) return;
 
-        Set<File> files = getFilesList(directory);
+        Set<File> files = this.filesManager.getFilesList(directory);
         if (files == null) return;
         if (files.contains(file)) return;
 
         files.add(file);
     }
 
-    public static void removeFileFromFolder(File directory, File file) {
+    public void removeFileFromFolder(File directory, File file) {
         if (FilesChecker.checkIfFileIsNull(file)) return;
 
-        Set<File> files = getFilesList(directory);
+        Set<File> files = this.filesManager.getFilesList(directory);
         if (files == null) return;
         if (!files.contains(file)) return;
 
@@ -48,9 +53,9 @@ public class FilesController {
         FilesProperty.delete(file);
     }
 
-    public static void addFolder(File directory) {
+    public void addFolder(File directory) {
         if (FilesChecker.checkIfDirectoryIsNull(directory)) return;
-        if (getFolders().containsKey(directory)) return;
+        if (this.folders.containsKey(directory)) return;
 
         File[] files = directory.listFiles();
         if (files == null) {
@@ -61,24 +66,11 @@ public class FilesController {
         folders.put(directory, new HashSet<>(Arrays.asList(files)));
     }
 
-    public static void removeFolder(File directory) {
+    public void removeFolder(File directory) {
         if (FilesChecker.checkIfDirectoryIsNull(directory)) return;
-        if (!getFolders().containsKey(directory)) return;
+        if (!this.folders.containsKey(directory)) return;
 
         folders.remove(directory);
         FilesProperty.delete(directory);
-    }
-
-    private static Set<File> getFilesList(File directory) {
-        if (FilesChecker.checkIfDirectoryIsNull(directory)) return null;
-        if (!getFolders().containsKey(directory)) return null;
-
-        Optional<Set<File>> optionalFiles = getFilesFromDirectory(directory);
-        if (!optionalFiles.isPresent()) {
-            Bukkit.getLogger().warning("Directory named " + directory.getName() + " was not found");
-            return null;
-        }
-
-        return optionalFiles.get();
     }
 }

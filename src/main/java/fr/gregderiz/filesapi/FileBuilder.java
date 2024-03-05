@@ -15,12 +15,12 @@ public class FileBuilder {
 
     public FileBuilder(String path, String name) {
         this.file = new File(path, name + ".yml");
-        this.fileConfiguration = YamlConfiguration.loadConfiguration(file);
+        this.fileConfiguration = YamlConfiguration.loadConfiguration(this.file);
     }
 
     public FileBuilder(File path, String name) {
         this.file = new File(path, name + ".yml");
-        this.fileConfiguration = YamlConfiguration.loadConfiguration(file);
+        this.fileConfiguration = YamlConfiguration.loadConfiguration(this.file);
     }
 
     public FileBuilder(File file) {
@@ -40,6 +40,11 @@ public class FileBuilder {
     public FileBuilder section(String name, Map<String, Object> data) {
         ConfigurationSection section = this.fileConfiguration.createSection(name);
         data.forEach(section::set);
+        return this;
+    }
+
+    public FileBuilder list(String name, Object[] data) {
+        this.fileConfiguration.set(name, data);
         return this;
     }
 

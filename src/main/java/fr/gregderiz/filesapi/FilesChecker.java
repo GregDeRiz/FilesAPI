@@ -23,7 +23,7 @@ public class FilesChecker {
         return false;
     }
 
-    public static boolean checkIfDirectory(File file) {
+    public static boolean isDirectory(File file) {
         return file.getName().contains(".");
     }
 }

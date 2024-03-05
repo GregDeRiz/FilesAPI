@@ -1,19 +1,18 @@
 package fr.gregderiz.filesapi;
 
 import org.bukkit.Bukkit;
-import org.bukkit.configuration.ConfigurationSection;
-import org.bukkit.configuration.file.FileConfiguration;
-import org.bukkit.configuration.file.YamlConfiguration;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.*;
+import java.util.Optional;
+import java.util.Set;
 
 public final class FilesManager {
-    public static FilesManager instance = null;
+    private static FilesManager instance = null;
+    private final FilesController filesController;
 
     private FilesManager() {
-
+        this.filesController = new FilesController(this);
     }
 
     public static FilesManager getFileManager() {
@@ -25,9 +24,9 @@ public final class FilesManager {
         File parent = file.getParentFile();
         if (!parent.exists()) parent.mkdirs();
 
-        if (!FilesChecker.checkIfDirectory(file)) {
+        if (!FilesChecker.isDirectory(file)) {
             if (!file.exists()) file.mkdirs();
-            FilesController.addFolder(file);
+            this.filesController.addFolder(file);
             return file;
         }
 
@@ -36,28 +35,28 @@ public final class FilesManager {
             catch (IOException e) { Bukkit.getLogger().severe("Error when creating file " + file.getName() + " by exception: " + e); }
         }
 
-        FilesController.addFolder(file.getParentFile());
+        this.filesController.addFolder(file.getParentFile());
         return file;
     }
 
-    public Map<String, Object> getDataOfFile(File file) {
-        FileConfiguration fileConfiguration = YamlConfiguration.loadConfiguration(file);
-        Map<String, Object> fileData = new HashMap<>();
+    public Set<File> getFilesList(File directory) {
+        if (FilesChecker.checkIfDirectoryIsNull(directory)) return null;
+        if (!this.filesController.getFolders().containsKey(directory)) return null;
 
-        for (String fileKey : fileConfiguration.getKeys(false)) {
-            if (fileConfiguration.isConfigurationSection(fileKey)) {
-                ConfigurationSection dataSection = fileConfiguration.getConfigurationSection(fileKey);
-                assert dataSection != null;
-
-                fileData.put(fileKey, dataSection.getValues(false));
-            }
-            if (!fileData.containsKey(fileKey)) fileData.put(fileKey, fileConfiguration.get(fileKey));
+        Optional<Set<File>> optionalFiles = this.filesController.getFilesFromDirectory(directory);
+        if (!optionalFiles.isPresent()) {
+            Bukkit.getLogger().warning("Directory named " + directory.getName() + " was not found");
+            return null;
         }
 
-        return fileData;
+        return optionalFiles.get();
     }
 
     public String getNameWithoutExtension(String file) {
         return file.substring(0, file.lastIndexOf("."));
+    }
+
+    public FilesController getFilesController() {
+        return this.filesController;
     }
 }

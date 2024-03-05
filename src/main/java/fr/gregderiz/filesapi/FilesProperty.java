@@ -54,7 +54,7 @@ public class FilesProperty {
 
     public static void delete(File file) {
         if (file.isDirectory()) {
-            Optional<Set<File>> optionalFiles = FilesController.getFilesFromDirectory(file);
+            Optional<Set<File>> optionalFiles = filesManager.getFilesController().getFilesFromDirectory(file);
             if (!optionalFiles.isPresent()) {
                 Bukkit.getLogger().warning("Directory named " + file.getName() + " is empty");
                 return;
@@ -63,7 +63,7 @@ public class FilesProperty {
             Set<File> files = optionalFiles.get();
             for (File child : files) {
                 delete(child);
-                FilesController.removeFileFromFolder(file, child);
+                filesManager.getFilesController().removeFileFromFolder(file, child);
             }
         }
 
