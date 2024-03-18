@@ -26,7 +26,7 @@ public final class FilesManager {
         File parent = file.getParentFile();
         if (!parent.exists()) parent.mkdirs();
 
-        if (!FilesChecker.isDirectory(file)) {
+        if (!FilesChecker.isFile(file)) {
             if (!file.exists()) file.mkdirs();
             this.filesController.addFolder(file);
             return file;
@@ -68,7 +68,7 @@ public final class FilesManager {
 
         Set<File> files = getFilesList(directory);
         return (files == null) ? Optional.empty() : files.stream()
-                .filter(file -> !FilesChecker.isDirectory(file))
+                .filter(FilesChecker::isFile)
                 .filter(file -> getNameWithoutExtension(file.getName()).equalsIgnoreCase(name)).findAny();
     }
 
