@@ -6,7 +6,7 @@
 
   <groupId>fr.gregderiz</groupId>
   <artifactId>FilesAPI</artifactId>
-  <version>0.6</version>
+  <version>0.7</version>
   <packaging>jar</packaging>
 
   <name>FilesAPI</name>

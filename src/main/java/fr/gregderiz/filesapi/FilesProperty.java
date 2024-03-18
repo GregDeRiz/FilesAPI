@@ -12,18 +12,24 @@ import java.util.Set;
 
 @SuppressWarnings("all")
 public class FilesProperty {
-    private static final FilesManager filesManager = FilesManager.getFileManager();
+    private final FilesManager filesManager;
+    private final FilesController filesController;
 
-    public static File create(File path, String name) {
+    public FilesProperty(FilesManager filesManager) {
+        this.filesManager = filesManager;
+        this.filesController = filesManager.getFilesController();
+    }
+
+    public File create(File path, String name) {
         File file = new File(path, name);
-        return filesManager.loadFile(file);
+        return this.filesManager.loadFile(file);
     }
 
-    public static File create(FileBuilder fileBuilder) {
-        return filesManager.loadFile(fileBuilder.build());
+    public File create(FileBuilder fileBuilder) {
+        return this.filesManager.loadFile(fileBuilder.build());
     }
 
-    public static void copy(File source, File destination) {
+    public void copy(File source, File destination) {
         if (source.isDirectory()) {
             if (!destination.exists()) destination.mkdir();
 
@@ -52,9 +58,9 @@ public class FilesProperty {
         } catch (IOException e) { throw new RuntimeException(e); }
     }
 
-    public static void delete(File file) {
+    public void delete(File file) {
         if (file.isDirectory()) {
-            Optional<Set<File>> optionalFiles = filesManager.getFilesController().getFilesFromDirectory(file);
+            Optional<Set<File>> optionalFiles = this.filesController.getFilesFromDirectory(file);
             if (!optionalFiles.isPresent()) {
                 Bukkit.getLogger().warning("Directory named " + file.getName() + " is empty");
                 return;
@@ -63,7 +69,7 @@ public class FilesProperty {
             Set<File> files = optionalFiles.get();
             for (File child : files) {
                 delete(child);
-                filesManager.getFilesController().removeFileFromFolder(file, child);
+                this.filesController.removeFileFromFolder(file, child);
             }
         }
 

@@ -10,9 +10,11 @@ import java.util.Set;
 public final class FilesManager {
     private static FilesManager instance = null;
     private final FilesController filesController;
+    private final FilesProperty filesProperty;
 
     private FilesManager() {
         this.filesController = new FilesController(this);
+        this.filesProperty = new FilesProperty(this);
     }
 
     public static FilesManager getFileManager() {
@@ -41,7 +43,6 @@ public final class FilesManager {
 
     public Set<File> getFilesList(File directory) {
         if (FilesChecker.checkIfDirectoryIsNull(directory)) return null;
-        if (!this.filesController.getFolders().containsKey(directory)) return null;
 
         Optional<Set<File>> optionalFiles = this.filesController.getFilesFromDirectory(directory);
         if (!optionalFiles.isPresent()) {
@@ -52,6 +53,28 @@ public final class FilesManager {
         return optionalFiles.get();
     }
 
+    public Optional<File> findDirectoryByName(String name) {
+        return this.filesController.getFolders().keySet().stream()
+                .filter(directory -> directory.getName().equalsIgnoreCase(name)).findAny();
+    }
+
+    public Optional<File> findDirectoryByPath(File path) {
+        return this.filesController.getFolders().keySet().stream()
+                .filter(directory -> directory.equals(path)).findAny();
+    }
+
+    public Optional<File> findFileByName(File directory, String name) {
+        if (!this.filesController.getFolders().containsKey(directory)) return Optional.empty();
+
+        Set<File> files = getFilesList(directory);
+        return (files == null) ? Optional.empty() : files.stream().filter(file ->
+                getNameWithoutExtension(file.getName()).equalsIgnoreCase(name)).findAny();
+    }
+
+    public void destroy() {
+        this.getFilesController().getFolders().clear();
+    }
+
     public String getNameWithoutExtension(String file) {
         return file.substring(0, file.lastIndexOf("."));
     }
@@ -59,4 +82,6 @@ public final class FilesManager {
     public FilesController getFilesController() {
         return this.filesController;
     }
+
+    public FilesProperty getFilesProperty() { return this.filesProperty; }
 }

@@ -8,24 +8,16 @@ import java.util.*;
 public class FilesController {
     private final Map<File, Set<File>> folders;
     private final FilesManager filesManager;
+    private final FilesProperty filesProperty;
 
     public FilesController(FilesManager filesManager) {
         this.folders = new HashMap<>();
         this.filesManager = filesManager;
+        this.filesProperty = filesManager.getFilesProperty();
     }
 
     public Map<File, Set<File>> getFolders() {
         return folders;
-    }
-
-    public Optional<File> findDirectoryByName(String name) {
-        return this.folders.keySet().stream().filter(directory -> directory.getName().equalsIgnoreCase(name)).findAny();
-    }
-
-    public Optional<File> findFileByName(File directory, String name) {
-        Set<File> files = this.filesManager.getFilesList(directory);
-        return (files == null) ? Optional.empty() : files.stream().filter(file ->
-                this.filesManager.getNameWithoutExtension(file.getName()).equalsIgnoreCase(name)).findAny();
     }
 
     public Optional<Set<File>> getFilesFromDirectory(File directory) {
@@ -34,6 +26,7 @@ public class FilesController {
 
     public void addFileToFolder(File directory, File file) {
         if (FilesChecker.checkIfFileIsNull(file)) return;
+        if (!this.folders.containsKey(directory)) return;
 
         Set<File> files = this.filesManager.getFilesList(directory);
         if (files == null) return;
@@ -44,13 +37,14 @@ public class FilesController {
 
     public void removeFileFromFolder(File directory, File file) {
         if (FilesChecker.checkIfFileIsNull(file)) return;
+        if (!this.folders.containsKey(directory)) return;
 
         Set<File> files = this.filesManager.getFilesList(directory);
         if (files == null) return;
         if (!files.contains(file)) return;
 
         files.remove(file);
-        FilesProperty.delete(file);
+        this.filesProperty.delete(file);
     }
 
     public void addFolder(File directory) {
@@ -71,6 +65,6 @@ public class FilesController {
         if (!this.folders.containsKey(directory)) return;
 
         folders.remove(directory);
-        FilesProperty.delete(directory);
+        this.filesProperty.delete(directory);
     }
 }
