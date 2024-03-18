@@ -67,8 +67,9 @@ public final class FilesManager {
         if (!this.filesController.getFolders().containsKey(directory)) return Optional.empty();
 
         Set<File> files = getFilesList(directory);
-        return (files == null) ? Optional.empty() : files.stream().filter(file ->
-                getNameWithoutExtension(file.getName()).equalsIgnoreCase(name)).findAny();
+        return (files == null) ? Optional.empty() : files.stream()
+                .filter(file -> !FilesChecker.isDirectory(file))
+                .filter(file -> getNameWithoutExtension(file.getName()).equalsIgnoreCase(name)).findAny();
     }
 
     public void destroy() {
