@@ -9,6 +9,7 @@ import java.util.Set;
 
 public final class FilesManager {
     private static FilesManager instance = null;
+
     private final FilesController filesController;
     private final FilesProperty filesProperty;
 

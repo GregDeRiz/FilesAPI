@@ -24,6 +24,7 @@ public class FilesChecker {
     }
 
     public static boolean isFile(File file) {
-        return file.getName().contains(".");
+        int extension = file.getName().lastIndexOf(".");
+        return extension >= 0;
     }
 }
