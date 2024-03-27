@@ -87,6 +87,19 @@ public class FileRead {
         catch (IOException e) { Bukkit.getLogger().severe("Error when saving file " + this.file.getName() + " by exception: " + e); }
     }
 
+    public void remove(String name) {
+        String fileName = FilesManager.getFileManager().getNameWithoutExtension(this.file.getName());
+        Optional<String> optionalSectionName = findSectionByName(name);
+        if (!optionalSectionName.isPresent()) {
+            Bukkit.getLogger().severe("Name " + name + " was not found in file " + fileName);
+            return;
+        }
+
+        this.fileConfiguration.set(optionalSectionName.get(), null);
+        try { this.fileConfiguration.save(this.file); }
+        catch (IOException e) { Bukkit.getLogger().severe("Error when saving file " + this.file.getName() + " by exception: " + e); }
+    }
+
     private Optional<String> findSectionByName(String name) {
         return this.sectionsName.stream().filter(sectionName -> sectionName.contains(name)).findFirst();
     }
